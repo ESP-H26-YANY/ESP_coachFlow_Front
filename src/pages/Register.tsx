@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { authService } from "../services/api";
-import { Button, Card, Label, TextInput } from "flowbite-react";
+import { Button, Card, Label, TextInput, Select } from "flowbite-react"; // Ajout de Select
 import { useNavigate, Link } from "react-router-dom";
 
 export default function Register() {
-  // 3 variables séparées. Pas de confusion possible.
+  
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("user"); // Valeur par défaut : Élève (user)
   
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -17,11 +18,11 @@ export default function Register() {
     setError("");
 
     try {
-      // On rassemble nos 3 variables dans un paquet pour l'envoyer au backend
       await authService.register({ 
         name: name, 
         email: email, 
-        password: password 
+        password: password,
+        role: role 
       });
       navigate("/login"); 
     } catch (err: any) {
@@ -65,6 +66,21 @@ export default function Register() {
 
           <div>
             <div className="mb-2 block">
+              <Label htmlFor="role">Je suis un</Label>
+            </div>
+            <Select 
+              id="role" 
+              required 
+              value={role} 
+              onChange={(e) => setRole(e.target.value)}
+            >
+              <option value="user">Élève</option>
+              <option value="coach">Coach</option>
+            </Select>
+          </div>
+
+          <div>
+            <div className="mb-2 block">
               <Label htmlFor="password">Mot de passe</Label>
             </div>
             <TextInput 
@@ -78,7 +94,7 @@ export default function Register() {
 
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
-          <Button type="submit" >
+          <Button type="submit">
             S'inscrire
           </Button>
         </form>
