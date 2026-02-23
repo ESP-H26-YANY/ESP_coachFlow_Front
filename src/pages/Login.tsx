@@ -23,7 +23,9 @@ export default function Login() {
       })
       .then((data) => {
           login(data);
-          navigate("/dashboard");
+          if (data.user.role === "coach") navigate("/coach/dashboard");
+          else if (data.user.role === "user") navigate("/user/dashboard");
+
       });   
     } catch (err: any) {
       setError("Email ou mot de passe incorrect");

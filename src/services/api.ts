@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5144/api"; 
+const API_URL = import.meta.env.VITE_API_URL; 
 
 const request = async <T>(endpoint: string, options: RequestInit): Promise<T> => {
   const token = localStorage.getItem("token");
