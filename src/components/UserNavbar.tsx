@@ -1,13 +1,21 @@
-import { Navbar, Button } from "flowbite-react";
+import { 
+  Navbar, 
+  NavbarBrand, 
+  NavbarCollapse, 
+  NavbarLink, 
+  NavbarToggle, 
+  Button 
+} from "flowbite-react";
 import { useAuth } from "../context/AuthContext";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
-export default function MyNavbar() {
+const Brand = NavbarBrand as any;
+const NavLink = NavbarLink as any;
+
+export default function UserNavbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-
-  // IA afin de contourner le bug de typage de Flowbite-React avec TypeScript
-  const Nav = Navbar as any;
+  const location = useLocation();
 
   const handleLogout = () => {
     logout();
@@ -15,28 +23,39 @@ export default function MyNavbar() {
   };
 
   return (
-    <Nav fluid rounded>
-      <Nav.Brand as={Link} to="/dashboard">
+    <Navbar fluid rounded>
+      <Brand as={Link} to="/user/dashboard">
         <span className="self-center whitespace-nowrap text-xl font-semibold dark:text-white">
           CoachFlow
         </span>
-      </Nav.Brand>
-      
-      <div className="flex md:order-2">
+      </Brand>
+
+      <div className="flex md:order-2 gap-2">
+        <span className="hidden md:block self-center mr-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+          {user?.name}
+        </span>
         <Button color="failure" onClick={handleLogout} size="xs">
           Déconnexion
         </Button>
-        <Nav.Toggle />
+        <NavbarToggle />
       </div>
-      
-      <Nav.Collapse>
-        <Nav.Link as={Link} to="/dashboard" active>
+
+      <NavbarCollapse>
+        <NavLink 
+          as={Link} 
+          to="/user/dashboard" 
+          active={location.pathname === "/user/dashboard"}
+        >
           Dashboard
-        </Nav.Link>
-        <Nav.Link as={Link} to="#">
-          Profil de {user?.name}
-        </Nav.Link>
-      </Nav.Collapse>
-    </Nav>
+        </NavLink>
+        <NavLink 
+          as={Link} 
+          to="/user/profil" 
+          active={location.pathname === "/user/profil"}
+        >
+          Mon Profil
+        </NavLink>
+      </NavbarCollapse>
+    </Navbar>
   );
 }

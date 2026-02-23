@@ -1,13 +1,22 @@
-import { Navbar, Button } from "flowbite-react";
+import { 
+  Navbar, 
+  NavbarBrand, 
+  NavbarCollapse, 
+  NavbarLink, 
+  NavbarToggle, 
+  Button 
+} from "flowbite-react";
 import { useAuth } from "../context/AuthContext";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
-export default function MyNavbar() {
+// Contournement strict avec 'any' pour éviter l'erreur TypeScript sur les props 'to' et 'as'
+const Brand = NavbarBrand as any;
+const NavLink = NavbarLink as any;
+
+export default function CoachNavbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-
-  // IA afin de contourner le bug de typage de Flowbite-React avec TypeScript
-  const Nav = Navbar as any;
+  const location = useLocation();
 
   const handleLogout = () => {
     logout();
@@ -15,28 +24,40 @@ export default function MyNavbar() {
   };
 
   return (
-    <Nav fluid rounded>
-      <Nav.Brand as={Link} to="/dashboard">
+    <Navbar fluid rounded>
+      <Brand as={Link} to="/coach/dashboard">
         <span className="self-center whitespace-nowrap text-xl font-semibold dark:text-white">
           CoachFlow
         </span>
-      </Nav.Brand>
+      </Brand>
       
-      <div className="flex md:order-2">
+      <div className="flex md:order-2 gap-2">
+        <span className="hidden md:block self-center mr-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+          {user?.name}
+        </span>
         <Button color="failure" onClick={handleLogout} size="xs">
           Déconnexion
         </Button>
-        <Nav.Toggle />
+        <NavbarToggle />
       </div>
       
-      <Nav.Collapse>
-        <Nav.Link as={Link} to="/dashboard" active>
+      <NavbarCollapse>
+        <NavLink 
+          as={Link} 
+          to="/coach/dashboard" 
+          active={location.pathname === "/coach/dashboard"}
+        >
           Dashboard
-        </Nav.Link>
-        <Nav.Link as={Link} to="#">
-          Profil de {user?.name}
-        </Nav.Link>
-      </Nav.Collapse>
-    </Nav>
+        </NavLink>
+        {/* Remplacer le "#" par la vraie route du profil coach quand elle existera */}
+        <NavLink 
+          as={Link} 
+          to="/coach/profil" 
+          active={location.pathname === "/coach/profil"}
+        >
+          Mon Profil
+        </NavLink>
+      </NavbarCollapse>
+    </Navbar>
   );
 }

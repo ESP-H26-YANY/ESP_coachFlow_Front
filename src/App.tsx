@@ -1,42 +1,53 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import CoachLayout from "./components/CoachLayout";
 import UserLayout from "./components/UserLayout";
-
-
-// Guard
 import RoleRoute from "./components/RoleRoute";
 
-// Pages (C'est des exemples, tu mettras tes vraies pages)
+// Pages
 import DashboardCoach from "./pages/coach/DashboardCoach";
 import DashboardUser from "./pages/user/DashboardUser";
 import UserProfile from "./pages/user/UserProfile";
+
+// Logique par IA car je voulais éviter de faire du code redondant pour les routes publiques (login/register) 
+// et les redirections basées sur le rôle. 
+// Le composant RoleRoute gère l'accès aux routes protégées en fonction du rôle de l'utilisateur, 
+// tandis que PublicRoute redirige les utilisateurs déjà connectés vers leur dashboard respectif.
+export const getDefaultRoute = (role?: "coach" | "user" | string) => 
+  role === "coach" ? "/coach/dashboard" : "/user/dashboard";
+const PublicRoute = () => {
+  const { user, isAuthenticated } = useAuth();
+  
+  if (isAuthenticated && user) {
+    return <Navigate to={getDefaultRoute(user.role)} replace />;
+  }
+  return <Outlet />;
+};
 
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Navigate to="/login" />} />
-          
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+
+          {/* === ROUTES PUBLIQUES === */}
+          <Route element={<PublicRoute />}>
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+          </Route>
 
           {/* === ZONE COACH === */}
-          {/* Protection : Seulement pour le rôle 'Coach' */}
           <Route element={<RoleRoute allowedRoles={['coach']} />}>
-            {/* Si c'est un coach, on applique le CoachLayout */}
             <Route element={<CoachLayout />}>
               <Route path="/coach/dashboard" element={<DashboardCoach />} />
             </Route>
           </Route>
 
           {/* === ZONE USER === */}
-          {/* Protection : Seulement pour le rôle 'User' */}
           <Route element={<RoleRoute allowedRoles={['user']} />}>
-            {/* Si c'est un user, on applique le UserLayout */}
             <Route element={<UserLayout />}>
               <Route path="/user/dashboard" element={<DashboardUser />} />
               <Route path="/user/profil" element={<UserProfile />} />
