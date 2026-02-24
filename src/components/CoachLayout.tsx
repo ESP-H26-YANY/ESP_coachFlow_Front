@@ -11,7 +11,7 @@ export default function CoachLayout() {
       
       <main className="container mx-auto p-6 flex-grow">
         <div className="bg-white p-6 rounded-lg shadow-lg border border-purple-100">
-          <span className="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-purple-900 dark:text-purple-300 mb-4 inline-block">ESPACE COACH</span>
+          <span className="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-purple-900 dark:text-purple-300 mb-4 inline-block">Espace coach</span>
           {/* Les PAGEEEEs seront ici */}
           <Outlet /> 
         </div>

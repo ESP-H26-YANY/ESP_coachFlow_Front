@@ -49,7 +49,20 @@ export default function CoachNavbar() {
         >
           Dashboard
         </NavLink>
-        {/* Remplacer le "#" par la vraie route du profil coach quand elle existera */}
+        <NavLink 
+          as={Link} 
+          to="/coach/guide" 
+          active={location.pathname === "/coach/guide"}
+        >
+          Guide du coach
+        </NavLink>
+        <NavLink 
+          as={Link} 
+          to="/coach/planning" 
+          active={location.pathname === "/coach/planning"}
+        >
+          Planning du coach
+        </NavLink>
         <NavLink 
           as={Link} 
           to="/coach/profil" 
