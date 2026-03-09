@@ -12,12 +12,15 @@ const request = async <T>(endpoint: string, options: RequestInit): Promise<T> =>
   const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     headers,
+    credentials: "include",
   });
 
   if (!response.ok) {
-    // On essaie de récupérer le message d'erreur du backend
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.message || `Erreur ${response.status}`);
+  }
+  if (response.status === 204) {
+      return null as unknown as T;
   }
 
   return response.json();
@@ -34,5 +37,17 @@ export const authService = {
     request<import("../types/auth").User>("/Auth/register", {
       method: "POST",
       body: JSON.stringify(data),
+    }),
+};
+
+export const guideService = {
+  getByUser: (userId: string) => 
+    request<import("../types/guide").Guide[]>(`/Guide/user/${userId}`, {
+      method: "GET",
+    }),
+
+  delete: (id: string) =>
+    request<void>(`/Guide/${id}`, {
+      method: "DELETE",
     }),
 };
