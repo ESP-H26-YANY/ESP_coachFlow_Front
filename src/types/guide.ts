@@ -9,3 +9,13 @@ export interface Guide {
   coverUrl?: string; 
   price: number;
 }
+
+export interface CreateGuideDTO {
+  title: string;
+  description: string;
+  category: string;
+  isBeginner: string; 
+  price: string;
+  pdfFile: File;
+  coachId: string;
+}
