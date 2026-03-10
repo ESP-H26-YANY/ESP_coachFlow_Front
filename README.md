@@ -1,54 +1,70 @@
-# React + TypeScript + Vite
+# CoachFlow Front-End
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Présentation
+CoachFlow Front-End est l'interface utilisateur de la plateforme web de coaching sportif. Développée en React avec TypeScript et Vite. 
 
-Currently, two official plugins are available:
+Le projet met l'accent sur un design moderne (grâce à Tailwind CSS et Flowbite React), une gestion d'état centralisée pour l'authentification, et un routage dynamique basé sur les rôles.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Fonctionnalités Principales
+* **Authentification centralisée :** Connexion et inscription avec gestion sécurisée du JWT (via `AuthContext` et `localStorage`).
+* **Routage protégé (`RoleRoute`) :** Redirection automatique et sécurisation des pages selon le rôle de l'utilisateur (`coach` ou `user`).
+* **Espace Coach :** * Tableau de bord personnalisé.
+  * Formulaire de publication de guides avec upload de fichiers (PDF) via `FormData`.
+  * Gestion (affichage et suppression) des guides publiés.
+* **Espace Élève :**
+  * Tableau de bord pour consulter et télécharger les guides.
+  * Gestion de la bibliothèque personnelle.
+* **UI/UX :** Composants pré-stylisés avec Flowbite React (Modales, Badges, Spinners, formulaires) compatibles avec un thème sombre natif.
 
-## Expanding the ESLint configuration
+## Technologies Utilisées
+* **Framework :** React 19
+* **Build Tool :** Vite
+* **Langage :** TypeScript
+* **Styling :** Tailwind CSS v4 & Flowbite React
+* **Routage :** React Router DOM v7
+* **Appels API :** Fetch API (encapsulé dans `src/services/api.ts` avec gestion des credentials)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-});
+## Architecture du Projet
+```text
+ESP_coachFlow_Front/
+├── public/                
+├── src/
+│   ├── components/         # Composants réutilisables (Navbars, Footers, Layouts, RoleRoute)
+│   ├── context/            # Contextes globaux (AuthContext pour l'état utilisateur)
+│   ├── pages/              # Vues principales de l'application
+│   │   ├── coach/          # Vues spécifiques aux coachs (Dashboard, Guide, etc.)
+│   │   └── user/           # Vues spécifiques aux élèves
+│   ├── services/           # Logique de communication avec l'API (api.ts)
+│   ├── types/              # Définitions des types et interfaces TypeScript (guide.ts, auth.ts)
+│   ├── App.tsx             # Configuration principale des routes
+│   └── main.tsx            # Point d'entrée React et initialisation du thème
+├── .env                    # Variables d'environnement (URL de l'API)
+├── tailwind.config.js      # Configuration de Tailwind CSS
+└── vite.config.ts          # Configuration du bundler Vite
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Installation des dépendances système
+Prérequis et lancement en local
+Pour faire tourner ce projet sur votre machine, vous avez besoin de :
 
-```js
-// eslint.config.js
-import reactX from "eslint-plugin-react-x";
-import reactDom from "eslint-plugin-react-dom";
+Node.js (version 18 ou supérieure)
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    "react-x": reactX,
-    "react-dom": reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs["recommended-typescript"].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-});
+L'API CoachFlow en cours d'exécution.
+
+- installation des dépendances
+
+```bash
+npm install
 ```
+
+- configuration de l'environnement
+Créez un fichier .env à la racine du projet et ajoutez l'URL de votre API locale :
+```
+VITE_API_URL=https://localhost:5144/api
+```
+- lancer le projet 
+```bash
+npm run dev
+```
+
+## Auteur : **Yany Boudedja**
