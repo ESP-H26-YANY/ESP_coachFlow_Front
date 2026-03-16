@@ -50,6 +50,13 @@ export default function UserNavbar() {
         </NavLink>
         <NavLink 
           as={Link} 
+          to="/user/Explorer" 
+          active={location.pathname === "/user/Explorer"}
+        >
+          Explorer
+        </NavLink>
+        <NavLink 
+          as={Link} 
           to="/user/profil" 
           active={location.pathname === "/user/profil"}
         >

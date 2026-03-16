@@ -12,6 +12,7 @@ import DashboardUser from "./pages/user/DashboardUser";
 import UserProfile from "./pages/user/UserProfile";
 import CoachProfile from "./pages/coach/CoachProfil";
 import CoachGuide from "./pages/coach/GuideCoach";
+import Explore from "./pages/user/ExplorerUser";
 
 // Logique par IA car je voulais éviter de faire du code redondant pour les routes publiques (login/register) 
 // et les redirections basées sur le rôle. 
@@ -55,6 +56,7 @@ function App() {
           <Route element={<RoleRoute allowedRoles={['user']} />}>
             <Route element={<UserLayout />}>
               <Route path="/user/dashboard" element={<DashboardUser />} />
+              <Route path="/user/Explorer" element={<Explore />} />
               <Route path="/user/profil" element={<UserProfile />} />
             </Route>
           </Route>
