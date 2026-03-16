@@ -112,7 +112,7 @@ export default function DashboardCoach() {
         {guides.length === 0 ? (
           <p className="text-gray-500">Vous n'avez pas encore de guide.</p>
         ) : (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {guides.map((guide) => (
               <GuideCard
                 key={guide.id}
@@ -135,7 +135,7 @@ export default function DashboardCoach() {
                         setSelectedGuide(guide.id === selectedGuide?.id ? null : guide)
                       }
                     >
-                      Detail
+                      Détails
                     </Button>
                     <Button
                       size="xs"
@@ -199,7 +199,7 @@ export default function DashboardCoach() {
               <div className="mb-2 block">
                 <Label htmlFor="description">Description</Label>
               </div>
-              <Textarea 
+              <Textarea
                 id="description"
                 required
                 value={description}
