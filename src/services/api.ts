@@ -72,5 +72,10 @@ export const guideService = {
       body: formData, 
     });
   },
+
+  getAll: () => 
+    request<import("../types/guide").Guide[]>("/Guide", {
+      method: "GET",
+    }),
 };
 
