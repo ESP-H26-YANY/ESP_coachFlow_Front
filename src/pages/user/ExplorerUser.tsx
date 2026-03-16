@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { guideService } from "../../services/api";
+import { guideService,libraryService } from "../../services/api";
 import { Guide } from "../../types/guide";
 import { Button, Spinner } from "flowbite-react";
 import GuideCard from "../../components/GuideCard";
@@ -23,6 +23,15 @@ export default function Explore() {
       setError("Impossible de charger le catalogue de guides.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleAddToLibrary = async (guideId: string) => {
+    try {
+      await libraryService.add(guideId);
+      alert("Guide ajouté à vos favoris avec succès !"); 
+    } catch (err: any) {
+      alert(err.message || "Erreur lors de l'ajout aux favoris.");
     }
   };
 
@@ -63,7 +72,7 @@ export default function Explore() {
                     size="xs"
                     color="purple"
                     className="w-full"
-                    onClick={() => console.log("Achat à venir")}
+                    onClick={() => handleAddToLibrary(guide.id)}
                   >
                     favoris
                   </Button>

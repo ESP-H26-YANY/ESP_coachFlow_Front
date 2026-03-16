@@ -10,6 +10,16 @@ export interface Guide {
   price: number;
 }
 
+export interface SavedGuide {
+  guideId: string;
+  title: string;
+  category: string;
+  price: number;
+  coverUrl: string;
+  linkUrl: string;
+  savedAt: string;
+}
+
 export interface CreateGuideDTO {
   title: string;
   description: string;
