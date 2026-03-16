@@ -58,13 +58,6 @@ export default function CoachNavbar() {
         </NavLink>
         <NavLink 
           as={Link} 
-          to="/coach/planning" 
-          active={location.pathname === "/coach/planning"}
-        >
-          Planning du coach
-        </NavLink>
-        <NavLink 
-          as={Link} 
           to="/coach/profil" 
           active={location.pathname === "/coach/profil"}
         >

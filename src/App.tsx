@@ -12,7 +12,6 @@ import DashboardUser from "./pages/user/DashboardUser";
 import UserProfile from "./pages/user/UserProfile";
 import CoachProfile from "./pages/coach/CoachProfil";
 import CoachGuide from "./pages/coach/GuideCoach";
-import CoachPlanning from "./pages/coach/planingCoach";
 
 // Logique par IA car je voulais éviter de faire du code redondant pour les routes publiques (login/register) 
 // et les redirections basées sur le rôle. 
@@ -48,7 +47,6 @@ function App() {
               <Route path="/coach/dashboard" element={<DashboardCoach />} />
               <Route path="/coach/profil" element={<CoachProfile />} />
               <Route path="/coach/guide" element={<CoachGuide />} />
-              <Route path="/coach/planning" element={<CoachPlanning />} />
               
             </Route>
           </Route>
