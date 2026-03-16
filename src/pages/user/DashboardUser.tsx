@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 import { guideService } from "../../services/api";
 import { Guide } from "../../types/guide";
 import { Button, Spinner } from "flowbite-react";
-import GuideCard from "../../components/GuideCard"; 
+import GuideCard from "../../components/GuideCard";
+import GuideModal from "../../components/GuideModal";
 
 export default function Explore() {
   const [guides, setGuides] = useState<Guide[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [selectedGuide, setSelectedGuide] = useState<Guide | null>(null);
 
   useEffect(() => {
     fetchGuides();
@@ -24,34 +26,69 @@ export default function Explore() {
     }
   };
 
-  if (isLoading) return <div className="flex justify-center items-center h-64"><Spinner size="xl" /></div>;
+  if (isLoading)
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Spinner size="xl" />
+      </div>
+    );
 
   return (
     <div className="space-y-8">
       <section>
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Explorer les guides</h2>
+        <div className="mb-6 flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Explorer les guides
+          </h2>
         </div>
 
-        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+        {error && <p className="mb-4 text-center text-red-500">{error}</p>}
 
         {guides.length === 0 && !error ? (
-          <div className="text-center p-10 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-            <p className="text-gray-500">Aucun guide disponible pour le moment.</p>
+          <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-10 text-center">
+            <p className="text-gray-500">
+              Aucun guide disponible pour le moment.
+            </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {guides.map((guide) => (
-              <GuideCard 
-                key={guide.id} 
-                guide={guide} 
+              <GuideCard
+                key={guide.id}
+                guide={guide}
                 actions={
-                  <Button size="sm" color="purple" className="w-full" onClick={() => console.log("Achat à venir")}>
-                    Découvrir
+                  <>
+                  
+                  <Button
+                    size="xs"
+                    color="purple"
+                    className="w-full"
+                    onClick={() => console.log("Achat à venir")}
+                  >
+                    Ajouter au favoris
                   </Button>
-                } 
+
+                  <Button
+                      size="xs"
+                      color="gray"
+                      className="w-full"
+                      onClick={() =>
+                        setSelectedGuide(guide.id === selectedGuide?.id ? null : guide)
+                      }
+                    >
+                      Detail
+                    </Button>
+                  </>
+                  
+                  
+                }
               />
             ))}
+            <GuideModal
+              show={selectedGuide !== null}
+              onClose={() => setSelectedGuide(null)}
+              guide={selectedGuide}
+            />
           </div>
         )}
       </section>
