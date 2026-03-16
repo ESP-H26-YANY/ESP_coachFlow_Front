@@ -12,6 +12,7 @@ import {
   TextInput,
   Select,
   FileInput,
+  Textarea,
 } from "flowbite-react";
 
 // pour voir les fichiers PDF, j'ai utilisé le lien direct fourni par l'API (stocké dans linkUrl) qui pointe vers le fichier sur le serveur.
@@ -198,7 +199,7 @@ export default function DashboardCoach() {
               <div className="mb-2 block">
                 <Label htmlFor="description">Description</Label>
               </div>
-              <TextInput
+              <Textarea 
                 id="description"
                 required
                 value={description}
