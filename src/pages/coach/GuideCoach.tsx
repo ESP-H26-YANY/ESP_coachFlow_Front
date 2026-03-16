@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { guideService } from "../../services/api";
 import { Guide } from "../../types/guide";
-import { Button, Card, Spinner, Badge, Label, TextInput,Select, FileInput} from "flowbite-react";
+import GuideCard from "../../components/GuideCard";
+import { Button, Card, Spinner,Label, TextInput,Select, FileInput} from "flowbite-react";
 
 // pour voir les fichiers PDF, j'ai utilisé le lien direct fourni par l'API (stocké dans linkUrl) qui pointe vers le fichier sur le serveur.
 const API_BASE_URL = import.meta.env.VITE_API_URL.replace("/api", "");
@@ -89,84 +90,41 @@ export default function DashboardCoach() {
     );
   }
 
-  // IA a été utilisée pour
   return (
     <div className="space-y-8">
       {/* LISTE DES GUIDES */}
       <section>
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Mes Guides ({guides.length})
-          </h2>
-        </div>
-
-        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-
-        {guides.length === 0 && !error ? (
-          <div className="text-center p-10 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-            <p className="text-gray-500">Vous n'avez pas encore de guide actif.</p>
-          </div>
+        <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Mes Guides</h2>
+        
+        {guides.length === 0 ? (
+          <p className="text-gray-500">Vous n'avez pas encore de guide.</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {guides.map((guide) => (
-              <Card key={guide.id} className="max-w-sm relative flex flex-col h-full">
-                
-                {/* Couverture du guide */}
-                {guide.coverUrl ? (
-                  <img 
-                    src={`${API_BASE_URL}${guide.coverUrl}`} 
-                    alt={guide.title} 
-                    className="h-48 w-full object-cover rounded-t-lg" 
-                  />
-                ) : (
-                  <div className="h-48 bg-gray-200 flex items-center justify-center rounded-t-lg text-gray-500">
-                    Pas de couverture
-                  </div>
-                )}
-
-                <div className="flex flex-col flex-grow">
-                  <div className="flex justify-between items-start mb-2">
-                    <h5 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
-                      {guide.title}
-                    </h5>
-                    <span className="text-lg font-bold text-purple-600">
-                      {guide.price}$
-                    </span>
-                  </div>
-
-                  <p className="font-normal text-sm text-gray-700 dark:text-gray-400 line-clamp-2 mb-4">
-                    {guide.description}
-                  </p>
-
-                  {/* Badges Flowbite TROP BEAU */}
-                  <div className="flex gap-2 mb-4">
-                    <Badge color={guide.isBeginner ? "success" : "warning"}>
-                      {guide.isBeginner ? "Débutant" : "Avancé"}
-                    </Badge>
-                    <Badge color="gray">{guide.category}</Badge>
-                  </div>
-
-                  {/* Boutons */}
-                  <div className="flex gap-2 mt-auto">
+            {guides.map((g) => (
+              <GuideCard 
+                key={g.id} 
+                guide={g} 
+                actions={
+                  <>
                     <Button 
-                      size="sm" 
-                      color="light" 
-                      className="w-full"
-                      href={`${API_BASE_URL}${guide.linkUrl}`} 
+                      size="xs" 
+                      color="purple" 
+                      className="w-full" 
+                      href={`${API_BASE_URL}${g.linkUrl}`} 
                     >
                       Ouvrir
                     </Button>
                     <Button 
-                      size="sm" 
-                      color="failure" 
-                      className="w-full"
-                      onClick={() => handleDelete(guide.id)}
+                      size="xs" 
+                      color="red" 
+                      className="w-full" 
+                      onClick={() => handleDelete(g.id)}
                     >
                       Supprimer
                     </Button>
-                  </div>
-                </div>
-              </Card>
+                  </>
+                } 
+              />
             ))}
           </div>
         )}
