@@ -6,7 +6,7 @@ export interface Guide {
   category: string;
   isBeginner: boolean;
   linkUrl: string;
-  coverUrl?: string; 
+  coverUrl?: string;
   price: number;
 }
 
@@ -16,16 +16,15 @@ export interface SavedGuide {
   category: string;
   price: number;
   coverUrl: string;
-  linkUrl: string;
   savedAt: string;
 }
 
-export interface CreateGuideDTO {
+export interface PurchasedGuide {
+  guideId: string;
   title: string;
-  description: string;
   category: string;
-  isBeginner: string; 
-  price: string;
-  pdfFile: File;
-  coachId: string;
+  price: number;
+  coverUrl: string;
+  linkUrl: string;
+  purchasedAt: string;
 }

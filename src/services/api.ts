@@ -77,6 +77,36 @@ export const guideService = {
     request<import("../types/guide").Guide[]>("/Guide", {
       method: "GET",
     }),
+    
+    downloadPdf: async (guideId: string, guideTitle: string) => {
+    const token = localStorage.getItem("token");
+    
+    const response = await fetch(`${API_URL}/Guide/${guideId}/download`, {
+      method: "GET",
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      throw new Error("Erreur lors du téléchargement. Avez-vous acheté ce guide ?");
+    }
+
+    // Récupération en fichier binaire
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${guideTitle}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    
+    // Nettoyage de la mémoire
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  }
 };
 
 export const libraryService = {
@@ -96,6 +126,11 @@ export const libraryService = {
   remove: (guideId: string) =>
     request<void>(`/Library/${guideId}`, { 
       method: "DELETE" 
+    }),
+
+    getPurchased: () => 
+    request<import("../types/guide").PurchasedGuide[]>("/Library/purchased", { 
+      method: "GET" 
     }),
 };
 

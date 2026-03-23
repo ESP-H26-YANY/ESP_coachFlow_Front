@@ -33,6 +33,7 @@ export default function DashboardCoach() {
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedGuide, setSelectedGuide] = useState<Guide | null>(null);
+  const [isDownloading, setIsDownloading] = useState<string | null>(null);
 
   useEffect(() => {
     if (user?.id) {
@@ -81,6 +82,17 @@ export default function DashboardCoach() {
     }
   };
 
+  const handleDownload = async (guideId: string, title: string) => {
+    setIsDownloading(guideId);
+    try {
+      await guideService.downloadPdf(guideId, title);
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setIsDownloading(null);
+    }
+  };
+
   const handleDelete = async (id: string) => {
     if (!confirm("Voulez-vous vraiment supprimer ce guide définitivement ?"))
       return;
@@ -120,19 +132,22 @@ export default function DashboardCoach() {
                 actions={
                   <>
                     <Button
-                      size="xs"
-                      color="indigo"
+                      size="sm"
+                      color="light"
                       className="w-full"
-                      href={`${API_BASE_URL}${guide.linkUrl}`}
+                      disabled={isDownloading === guide.id}
+                      onClick={() => handleDownload(guide.id, guide.title)}
                     >
-                      Ouvrir
+                      "Ouvrir"
                     </Button>
                     <Button
                       size="xs"
                       color="gray"
                       className="w-full"
                       onClick={() =>
-                        setSelectedGuide(guide.id === selectedGuide?.id ? null : guide)
+                        setSelectedGuide(
+                          guide.id === selectedGuide?.id ? null : guide,
+                        )
                       }
                     >
                       Détails
