@@ -14,6 +14,7 @@ export default function DashboardUser() {
   
   const [selectedGuide, setSelectedGuide] = useState<Guide | null>(null);
   const [isDownloading, setIsDownloading] = useState<string | null>(null);
+  const [isPurchasing, setIsPurchasing] = useState<string | null>(null);
 
   useEffect(() => {
     fetchDashboardData();
@@ -81,6 +82,21 @@ export default function DashboardUser() {
     }
   };
 
+  const handlePurchase = async (guideId: string) => {
+    if (!window.confirm("Voulez-vous acheter ce guide avec votre portefeuille ?")) return;
+    
+    setIsPurchasing(guideId);
+    try {
+      await libraryService.purchase(guideId);
+      await fetchDashboardData(); 
+      alert("Achat réussi ! Le guide a été ajouté à vos achats.");
+    } catch (err: any) {
+      alert(err.message || "Erreur lors de l'achat. Avez-vous assez de fonds ?");
+    } finally {
+      setIsPurchasing(null);
+    }
+  };
+
   if (isLoading) return <div className="flex h-64 items-center justify-center"><Spinner size="xl" /></div>;
 
   return (
@@ -144,6 +160,15 @@ export default function DashboardUser() {
                 guide={guide}
                 actions={
                   <>
+                  <Button
+                      size="xs"
+                      color="purple"
+                      className="w-full"
+                      onClick={() => handlePurchase(guide.id)}
+                    >
+                      Acheter
+                    </Button>
+
                     <Button
                       size="xs"
                       color="failure"

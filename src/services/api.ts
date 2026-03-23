@@ -1,8 +1,11 @@
-const API_URL = import.meta.env.VITE_API_URL; 
+const API_URL = import.meta.env.VITE_API_URL;
 
-const request = async <T>(endpoint: string, options: RequestInit): Promise<T> => {
+const request = async <T>(
+  endpoint: string,
+  options: RequestInit,
+): Promise<T> => {
   const token = localStorage.getItem("token");
-  
+
   const isFormData = options.body instanceof FormData;
 
   const headers: HeadersInit = {
@@ -17,7 +20,7 @@ const request = async <T>(endpoint: string, options: RequestInit): Promise<T> =>
   const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     headers,
-    credentials: "include", 
+    credentials: "include",
   });
 
   if (!response.ok) {
@@ -54,9 +57,9 @@ export const guideService = {
       method: "DELETE",
     }),
 
-  create: (data: any) => { 
+  create: (data: any) => {
     const formData = new FormData();
-    
+
     //IA : Je dois faire ca afin de pouvoir envoyer le fichier PDF dans la requete, et comme le backend attend un multipart/form-data,
     // je dois construire manuellement le FormData.
 
@@ -69,18 +72,18 @@ export const guideService = {
 
     return request<import("../types/guide").Guide>("/Guide", {
       method: "POST",
-      body: formData, 
+      body: formData,
     });
   },
 
-  getAll: () => 
+  getAll: () =>
     request<import("../types/guide").Guide[]>("/Guide", {
       method: "GET",
     }),
-    
-    downloadPdf: async (guideId: string, guideTitle: string) => {
+
+  downloadPdf: async (guideId: string, guideTitle: string) => {
     const token = localStorage.getItem("token");
-    
+
     const response = await fetch(`${API_URL}/Guide/${guideId}/download`, {
       method: "GET",
       headers: {
@@ -90,48 +93,50 @@ export const guideService = {
     });
 
     if (!response.ok) {
-            const errorData = await response.json().catch(() => ({})); 
-            throw new Error(errorData.message || "Erreur critique du serveur.");
-        }
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Erreur critique du serveur.");
+    }
 
     // Récupération en fichier binaire
     const blob = await response.blob();
     const url = window.URL.createObjectURL(blob);
-    
+
     const a = document.createElement("a");
     a.href = url;
     a.download = `${guideTitle}.pdf`;
     document.body.appendChild(a);
     a.click();
-    
+
     // Nettoyage de la mémoire
     a.remove();
     window.URL.revokeObjectURL(url);
-  }
+  },
 };
 
 export const libraryService = {
   // Ajouter un guide à sa bibliothèque
   add: (guideId: string) =>
-    request<void>(`/Library/${guideId}`, { 
-      method: "POST" 
+    request<void>(`/Library/${guideId}`, {
+      method: "POST",
     }),
 
   // Récupérer la bibliothèque de l'utilisateur (pour le dashboard)
   getMine: () =>
-    request<import("../types/guide").SavedGuide[]>("/Library", { 
-      method: "GET" 
+    request<import("../types/guide").SavedGuide[]>("/Library", {
+      method: "GET",
     }),
 
   // Retirer un guide de sa bibliothèque
   remove: (guideId: string) =>
-    request<void>(`/Library/${guideId}`, { 
-      method: "DELETE" 
+    request<void>(`/Library/${guideId}`, {
+      method: "DELETE",
     }),
 
-    getPurchased: () => 
-    request<import("../types/guide").PurchasedGuide[]>("/Library/purchased", { 
-      method: "GET" 
+  getPurchased: () =>
+    request<import("../types/guide").PurchasedGuide[]>("/Library/purchased", {
+      method: "GET",
     }),
+
+  purchase: (guideId: string) =>
+    request<void>(`/Library/purchase/${guideId}`, { method: "POST" }),
 };
-
