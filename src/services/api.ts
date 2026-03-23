@@ -90,8 +90,9 @@ export const guideService = {
     });
 
     if (!response.ok) {
-      throw new Error("Erreur lors du téléchargement. Avez-vous acheté ce guide ?");
-    }
+            const errorData = await response.json().catch(() => ({})); 
+            throw new Error(errorData.message || "Erreur critique du serveur.");
+        }
 
     // Récupération en fichier binaire
     const blob = await response.blob();
