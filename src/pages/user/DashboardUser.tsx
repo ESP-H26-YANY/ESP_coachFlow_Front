@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { libraryService, guideService } from "../../services/api";
 import { Guide } from "../../types/guide";
-import { Button, Spinner } from "flowbite-react";
+import { Button, Spinner, Alert } from "flowbite-react";
 import GuideCard from "../../components/GuideCard";
 import GuideModal from "../../components/GuideModal";
 
@@ -15,6 +15,8 @@ export default function DashboardUser() {
   const [selectedGuide, setSelectedGuide] = useState<Guide | null>(null);
   const [isDownloading, setIsDownloading] = useState<string | null>(null);
   const [isPurchasing, setIsPurchasing] = useState<string | null>(null);
+  const [confirmAction, setConfirmAction] = useState<{ type: 'remove' | 'purchase', guideId: string } | null>(null);
+  const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
     fetchDashboardData();
@@ -55,7 +57,7 @@ export default function DashboardUser() {
       setPurchasedGuides(formattedPurchased);
       setSavedGuides(formattedSaved);
     } catch (err: any) {
-      setError("Impossible de charger vos données.");
+      setError(err.message || "Impossible de charger vos données.");
     } finally {
       setIsLoading(false);
     }
@@ -66,32 +68,36 @@ export default function DashboardUser() {
     try {
       await guideService.downloadPdf(guideId, title);
     } catch (err: any) {
-      alert(err.message);
+      setError(err.message || "Erreur lors du téléchargement.");
     } finally {
       setIsDownloading(null);
     }
   };
 
-  const handleRemoveFromLibrary = async (guideId: string) => {
-    if (!window.confirm("Voulez-vous retirer ce guide de vos favoris ?")) return;
+const executeRemove = async (guideId: string) => {
+    setConfirmAction(null); // On ferme la confirmation
     try {
       await libraryService.remove(guideId);
       setSavedGuides(savedGuides.filter((g) => g.id !== guideId));
+      setSuccessMessage("Guide retiré de vos favoris.");
+      setError("");
     } catch (err: any) {
-      alert(err.message || "Erreur lors du retrait.");
+      setError(err.message || "Erreur lors du retrait.");
+      setSuccessMessage("");
     }
   };
 
-  const handlePurchase = async (guideId: string) => {
-    if (!window.confirm("Voulez-vous acheter ce guide avec votre portefeuille ?")) return;
-    
+  const executePurchase = async (guideId: string) => {
+    setConfirmAction(null); 
     setIsPurchasing(guideId);
     try {
       await libraryService.purchase(guideId);
       await fetchDashboardData(); 
-      alert("Achat réussi ! Le guide a été ajouté à vos achats.");
+      setSuccessMessage("Achat réussi ! Le guide a été ajouté à vos achats.");
+      setError("");
     } catch (err: any) {
-      alert(err.message || "Erreur lors de l'achat. Avez-vous assez de fonds ?");
+      setError(err.message || "Erreur lors de l'achat. Avez-vous assez de fonds ?");
+      setSuccessMessage("");
     } finally {
       setIsPurchasing(null);
     }
@@ -99,9 +105,19 @@ export default function DashboardUser() {
 
   if (isLoading) return <div className="flex h-64 items-center justify-center"><Spinner size="xl" /></div>;
 
-  return (
+return (
     <div className="space-y-12">
-      {error && <p className="text-center text-red-500">{error}</p>}
+      {error && (
+        <Alert color="failure" className="mb-4" onDismiss={() => setError("")}>
+          <span className="font-medium">Erreur :</span> {error}
+        </Alert>
+      )}
+
+      {successMessage && (
+        <Alert color="success" className="mb-4" onDismiss={() => setSuccessMessage("")}>
+          <span className="font-medium">Succès :</span> {successMessage}
+        </Alert>
+      )}
 
       {/* SECTION 1 : ACHATS */}
       <section>
@@ -118,7 +134,7 @@ export default function DashboardUser() {
                 key={guide.id}
                 guide={guide}
                 actions={
-                  <>
+                  <div className="flex gap-2 w-full">
                     <Button
                       size="xs"
                       color="purple"
@@ -136,7 +152,7 @@ export default function DashboardUser() {
                     >
                       Détails
                     </Button>
-                  </>
+                  </div>
                 }
               />
             ))}
@@ -159,33 +175,58 @@ export default function DashboardUser() {
                 key={guide.id}
                 guide={guide}
                 actions={
-                  <>
-                  <Button
-                      size="xs"
-                      color="purple"
-                      className="w-full"
-                      onClick={() => handlePurchase(guide.id)}
-                    >
-                      Acheter
-                    </Button>
+                  confirmAction?.guideId === guide.id ? (
+                    // --- VUE CONFIRMATION (FAVORIS) ---
+                    <div className="flex flex-col gap-2 w-full text-center">
+                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                        {confirmAction.type === 'purchase' ? "Confirmer l'achat ?" : "Retirer des favoris ?"}
+                      </span>
+                      <div className="flex gap-2">
+                        <Button 
+                          size="xs" 
+                          color="purple" 
+                          className="w-full" 
+                          onClick={() => confirmAction.type === 'purchase' ? executePurchase(guide.id) : executeRemove(guide.id)}
+                        >
+                          Oui
+                        </Button>
+                        <Button size="xs" color="gray" className="w-full" onClick={() => setConfirmAction(null)}>
+                          Non
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    // --- VUE NORMALE (FAVORIS) ---
+                    <div className="flex gap-2 w-full">
+                      <Button
+                        size="xs"
+                        color="purple"
+                        className="w-full"
+                        disabled={isPurchasing === guide.id}
+                        onClick={() => setConfirmAction({ type: 'purchase', guideId: guide.id })}
+                      >
+                        {isPurchasing === guide.id ? <Spinner size="sm" /> : "Acheter"}
+                      </Button>
+                      
+                      <Button
+                        size="xs"
+                        color="failure"
+                        className="w-full"
+                        onClick={() => setConfirmAction({ type: 'remove', guideId: guide.id })}
+                      >
+                        Retirer
+                      </Button>
 
-                    <Button
-                      size="xs"
-                      color="failure"
-                      className="w-full"
-                      onClick={() => handleRemoveFromLibrary(guide.id)}
-                    >
-                      Retirer
-                    </Button>
-                    <Button
-                      size="xs"
-                      color="gray"
-                      className="w-full"
-                      onClick={() => setSelectedGuide(guide)}
-                    >
-                      Détails
-                    </Button>
-                  </>
+                      <Button
+                        size="xs"
+                        color="gray"
+                        className="w-full"
+                        onClick={() => setSelectedGuide(guide)}
+                      >
+                        Détails
+                      </Button>
+                    </div>
+                  )
                 }
               />
             ))}

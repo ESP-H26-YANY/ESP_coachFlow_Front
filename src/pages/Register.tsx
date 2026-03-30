@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { authService } from "../services/api";
-import { Button, Card, Label, TextInput, Select } from "flowbite-react"; // Ajout de Select
+import { Button, Card, Label, TextInput, Select, Alert } from "flowbite-react"; // Ajout de Select
 import { useNavigate, Link } from "react-router-dom";
 
 export default function Register() {
@@ -26,7 +26,7 @@ export default function Register() {
       });
       navigate("/login"); 
     } catch (err: any) {
-      setError("Erreur lors de l'inscription");
+      setError(err.message || "Email ou mot de passe incorrect");
     }
   };
 
@@ -92,7 +92,11 @@ export default function Register() {
             />
           </div>
 
-          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+          {error && (
+                  <Alert color="failure" className="mb-4" onDismiss={() => setError("")}>
+                    <span className="font-medium">Erreur :</span> {error}
+                  </Alert>
+                )}
 
           <Button type="submit">
             S'inscrire

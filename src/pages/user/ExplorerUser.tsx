@@ -1,14 +1,18 @@
 import { useState, useEffect } from "react";
-import { guideService,libraryService } from "../../services/api";
+import { guideService, libraryService } from "../../services/api";
 import { Guide } from "../../types/guide";
-import { Button, Spinner } from "flowbite-react";
+import { Button, Spinner, Alert } from "flowbite-react";
 import GuideCard from "../../components/GuideCard";
 import GuideModal from "../../components/GuideModal";
 
 export default function Explore() {
   const [guides, setGuides] = useState<Guide[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [confirmAction, setConfirmAction] = useState<string | null>(null);
+  
   const [selectedGuide, setSelectedGuide] = useState<Guide | null>(null);
 
   useEffect(() => {
@@ -20,18 +24,21 @@ export default function Explore() {
       const data = await guideService.getAll();
       setGuides(data);
     } catch (err: any) {
-      setError("Impossible de charger le catalogue de guides.");
+      setError(err.message || "Impossible de charger le catalogue de guides.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleAddToLibrary = async (guideId: string) => {
+  const executeAddToLibrary = async (guideId: string) => {
+    setConfirmAction(null); 
     try {
       await libraryService.add(guideId);
-      alert("Guide ajouté à vos favoris avec succès !"); 
+      setSuccessMessage("Guide ajouté à vos favoris avec succès !");
+      setError("");
     } catch (err: any) {
-      alert(err.message || "Erreur lors de l'ajout aux favoris.");
+      setError(err.message || "Erreur lors de l'ajout aux favoris.");
+      setSuccessMessage("");
     }
   };
 
@@ -51,7 +58,18 @@ export default function Explore() {
           </h2>
         </div>
 
-        {error && <p className="mb-4 text-center text-red-500">{error}</p>}
+        {/* AFFICHAGE DES ERREURS ET SUCCÈS */}
+        {error && (
+          <Alert color="failure" className="mb-4" onDismiss={() => setError("")}>
+            <span className="font-medium">Erreur :</span> {error}
+          </Alert>
+        )}
+
+        {successMessage && (
+          <Alert color="success" className="mb-4" onDismiss={() => setSuccessMessage("")}>
+            <span className="font-medium">Succès :</span> {successMessage}
+          </Alert>
+        )}
 
         {guides.length === 0 && !error ? (
           <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-10 text-center">
@@ -66,30 +84,48 @@ export default function Explore() {
                 key={guide.id}
                 guide={guide}
                 actions={
-                  <>
-                  
-                  <Button
-                    size="xs"
-                    color="purple"
-                    className="w-full"
-                    onClick={() => handleAddToLibrary(guide.id)}
-                  >
-                    favoris
-                  </Button>
+                  confirmAction === guide.id ? (
+                    // --- VUE CONFIRMATION ---
+                    <div className="flex flex-col gap-2 w-full text-center">
+                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                        Ajouter aux favoris ?
+                      </span>
+                      <div className="flex gap-2">
+                        <Button 
+                          size="xs" 
+                          color="purple" 
+                          className="w-full" 
+                          onClick={() => executeAddToLibrary(guide.id)}
+                        >
+                          Oui
+                        </Button>
+                        <Button size="xs" color="gray" className="w-full" onClick={() => setConfirmAction(null)}>
+                          Non
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    // --- VUE NORMALE ---
+                    <div className="flex gap-2 w-full">
+                      <Button
+                        size="xs"
+                        color="purple"
+                        className="w-full"
+                        onClick={() => setConfirmAction(guide.id)}
+                      >
+                        Favoris
+                      </Button>
 
-                  <Button
-                      size="xs"
-                      color="gray"
-                      className="w-full"
-                      onClick={() =>
-                        setSelectedGuide(guide.id === selectedGuide?.id ? null : guide)
-                      }
-                    >
-                      Detail
-                    </Button>
-                  </>
-                  
-                  
+                      <Button
+                        size="xs"
+                        color="gray"
+                        className="w-full"
+                        onClick={() => setSelectedGuide(guide)}
+                      >
+                        Détails
+                      </Button>
+                    </div>
+                  )
                 }
               />
             ))}

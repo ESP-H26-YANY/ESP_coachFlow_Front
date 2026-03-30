@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { authService } from "../services/api";
-import { Button, Card, Label, TextInput } from "flowbite-react";
+import { Alert, Button, Card, Label, TextInput } from "flowbite-react";
 import { useNavigate, Link } from "react-router-dom";
 
 export default function Login() {
@@ -28,13 +28,18 @@ export default function Login() {
 
       });   
     } catch (err: any) {
-      setError("Email ou mot de passe incorrect");
+      setError(err.message || "Email ou mot de passe incorrect");
     }
   };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-gray-900">
       <Card className="max-w-md w-full">
+      {error && (
+        <Alert color="failure" className="mb-4" onDismiss={() => setError("")}>
+          <span className="font-medium">Erreur :</span> {error}
+        </Alert>
+      )}
         <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
           Connexion
         </h2>
@@ -66,8 +71,6 @@ export default function Login() {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-          
-          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
           <Button type="submit" >
             Se connecter
@@ -80,4 +83,5 @@ export default function Login() {
       </Card>
     </div>
   );
+  
 }

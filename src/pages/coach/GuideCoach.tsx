@@ -3,6 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 import { guideService } from "../../services/api";
 import { Guide } from "../../types/guide";
 import GuideCard from "../../components/GuideCard";
+import GuideModal from "../../components/GuideModal";
 import {
   Button,
   Card,
@@ -12,15 +13,19 @@ import {
   Select,
   FileInput,
   Textarea,
+  Alert, // <-- Ajout de Alert
 } from "flowbite-react";
-
 
 export default function DashboardCoach() {
   const { user } = useAuth();
 
   const [guides, setGuides] = useState<Guide[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Nouveaux states pour gérer les messages et la confirmation
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [confirmAction, setConfirmAction] = useState<string | null>(null);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -28,6 +33,7 @@ export default function DashboardCoach() {
   const [isBeginner, setIsBeginner] = useState("true");
   const [price, setPrice] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedGuide, setSelectedGuide] = useState<Guide | null>(null);
   const [isDownloading, setIsDownloading] = useState<string | null>(null);
@@ -43,17 +49,23 @@ export default function DashboardCoach() {
       const data = await guideService.getByUser(user!.id!);
       setGuides(data);
     } catch (err: any) {
-      setError("Impossible de charger vos guides.");
+      setError(err.message || "Impossible de charger vos guides.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file) return alert("Le fichier PDF est requis.");
+    if (!file) {
+      setError("Le fichier PDF est requis.");
+      return;
+    }
 
     setIsSubmitting(true);
+    setError("");
+    setSuccessMessage("");
+    
     try {
       const newGuide = await guideService.create({
         title,
@@ -71,9 +83,9 @@ export default function DashboardCoach() {
       setPrice("");
       setFile(null);
 
-      alert("Guide publié avec succès !");
+      setSuccessMessage("Guide publié avec succès !");
     } catch (err: any) {
-      setError("Erreur lors de la création du guide.");
+      setError(err.message || "Erreur lors de la création du guide.");
     } finally {
       setIsSubmitting(false);
     }
@@ -81,24 +93,26 @@ export default function DashboardCoach() {
 
   const handleDownload = async (guideId: string, title: string) => {
     setIsDownloading(guideId);
+    setError("");
     try {
       await guideService.downloadPdf(guideId, title);
     } catch (err: any) {
-      alert(err.message);
+      setError(err.message || "Erreur lors du téléchargement.");
     } finally {
       setIsDownloading(null);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Voulez-vous vraiment supprimer ce guide définitivement ?"))
-      return;
-
+  const executeDelete = async (id: string) => {
+    setConfirmAction(null); // On ferme la confirmation
     try {
       await guideService.delete(id);
       setGuides(guides.filter((g) => g.id !== id));
+      setSuccessMessage("Guide supprimé définitivement.");
+      setError("");
     } catch (err: any) {
-      alert("Erreur lors de la suppression.");
+      setError(err.message || "Erreur lors de la suppression.");
+      setSuccessMessage("");
     }
   };
 
@@ -112,6 +126,20 @@ export default function DashboardCoach() {
 
   return (
     <div className="space-y-8">
+      
+      {/* AFFICHAGE DES ERREURS ET SUCCÈS GLOBAUX */}
+      {error && (
+        <Alert color="failure" className="mb-4" onDismiss={() => setError("")}>
+          <span className="font-medium">Erreur :</span> {error}
+        </Alert>
+      )}
+
+      {successMessage && (
+        <Alert color="success" className="mb-4" onDismiss={() => setSuccessMessage("")}>
+          <span className="font-medium">Succès :</span> {successMessage}
+        </Alert>
+      )}
+
       {/* LISTE DES GUIDES */}
       <section>
         <h2 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">
@@ -121,43 +149,62 @@ export default function DashboardCoach() {
         {guides.length === 0 ? (
           <p className="text-gray-500">Vous n'avez pas encore de guide.</p>
         ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4.5">
             {guides.map((guide) => (
               <GuideCard
                 key={guide.id}
                 guide={guide}
                 actions={
-                  <>
-                    <Button
-                      size="sm"
-                      color="light"
-                      className="w-full"
-                      disabled={isDownloading === guide.id}
-                      onClick={() => handleDownload(guide.id, guide.title)}
-                    >
-                      "Ouvrir"
-                    </Button>
-                    <Button
-                      size="xs"
-                      color="gray"
-                      className="w-full"
-                      onClick={() =>
-                        setSelectedGuide(
-                          guide.id === selectedGuide?.id ? null : guide,
-                        )
-                      }
-                    >
-                      Détails
-                    </Button>
-                    <Button
-                      size="xs"
-                      color="red"
-                      className="w-full"
-                      onClick={() => handleDelete(guide.id)}
-                    >
-                      Supprimer
-                    </Button>
-                  </>
+                  confirmAction === guide.id ? (
+                    // --- VUE CONFIRMATION (SUPPRESSION) ---
+                    <div className="flex flex-col gap-2 w-full text-center">
+                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                        Supprimer ce guide ?
+                      </span>
+                      <div className="flex gap-2">
+                        <Button 
+                          size="xs" 
+                          color="failure" 
+                          className="w-full" 
+                          onClick={() => executeDelete(guide.id)}
+                        >
+                          Oui
+                        </Button>
+                        <Button size="xs" color="gray" className="w-full" onClick={() => setConfirmAction(null)}>
+                          Non
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    // --- VUE NORMALE ---
+                    <div className="flex gap-2 w-full">
+                      <Button
+                        size="xs"
+                        color="light"
+                        className="w-full border border-gray-300"
+                        disabled={isDownloading === guide.id}
+                        onClick={() => handleDownload(guide.id, guide.title)}
+                      >
+                        {isDownloading === guide.id ? <Spinner size="sm" /> : "Ouvrir"}
+                      </Button>
+                      <Button
+                        size="xs"
+                        color="gray"
+                        className="w-full"
+                        onClick={() => setSelectedGuide(guide)}
+                      >
+                        Détails
+                      </Button>
+                      <Button
+                        size="xs"
+                        color="red"
+                        className="w-full"
+                        onClick={() => setConfirmAction(guide.id)}
+                      >
+                        Supprimer
+                      </Button>
+                    </div>
+                  )
                 }
               />
             ))}
@@ -167,7 +214,7 @@ export default function DashboardCoach() {
 
       <hr className="border-gray-300 dark:border-gray-700" />
 
-      {/* SECTION FORMULAIRE (Bas) - Logique visuelle Login/Register */}
+      {/* SECTION FORMULAIRE */}
       <section className="flex items-center justify-center rounded-lg bg-gray-50 p-6 dark:bg-gray-800">
         <Card className="w-full max-w-2xl">
           <h2 className="text-center text-2xl font-bold text-gray-900 dark:text-white">
@@ -266,10 +313,6 @@ export default function DashboardCoach() {
               />
             </div>
 
-            {error && (
-              <p className="text-center text-sm text-red-500">{error}</p>
-            )}
-
             <Button type="submit" disabled={isSubmitting} color="purple">
               {isSubmitting ? <Spinner size="sm" className="mr-2" /> : null}
               Publier le guide
@@ -277,6 +320,13 @@ export default function DashboardCoach() {
           </form>
         </Card>
       </section>
+
+      {/* MODAL POUR LES DÉTAILS DU GUIDE */}
+      <GuideModal
+        show={selectedGuide !== null}
+        onClose={() => setSelectedGuide(null)}
+        guide={selectedGuide}
+      />
     </div>
   );
 }
