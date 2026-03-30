@@ -131,6 +131,7 @@ export default function CreateGuideForm({
             <TextInput
               id="price"
               type="number"
+              min="0"
               required
               value={price}
               onChange={(e) => setPrice(e.target.value)}
