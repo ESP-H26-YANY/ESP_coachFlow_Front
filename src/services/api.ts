@@ -46,6 +46,19 @@ export const authService = {
     }),
 };
 
+export const userService = {
+  getMe: () => 
+    request<import("../types/auth").User>("/User/me", { 
+      method: "GET" 
+    }),
+
+  topup: (amount: number) => 
+    request<void>("/User/topup", {
+      method: "POST",
+      body: JSON.stringify({ amount }),
+    }),
+};
+
 export const guideService = {
   getByUser: (userId: string) =>
     request<import("../types/guide").Guide[]>(`/Guide/user/${userId}`, {
@@ -111,6 +124,25 @@ export const guideService = {
     a.remove();
     window.URL.revokeObjectURL(url);
   },
+
+  getById: (id: string) =>
+    request<import("../types/guide").Guide>(`/Guide/${id}`, {
+      method: "GET",
+    }),
+
+  update: (
+    id: string,
+    data: {
+      title: string;
+      description: string;
+      category: string;
+      price: number;
+    },
+  ) =>
+    request<import("../types/guide").Guide>(`/Guide/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
 };
 
 export const libraryService = {
