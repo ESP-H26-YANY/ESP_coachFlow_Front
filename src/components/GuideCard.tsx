@@ -6,7 +6,7 @@ interface GuideCardProps {
   guide: Guide;
   actions?: ReactNode; 
 }
-
+// Aidé par IA pour un bon component de carte de guide.
 export default function GuideCard({ guide, actions }: GuideCardProps) {
   const API_BASE_URL = import.meta.env.VITE_API_URL.replace("/api", "");
 

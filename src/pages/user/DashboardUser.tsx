@@ -2,20 +2,23 @@ import { useState, useEffect } from "react";
 import { libraryService, guideService } from "../../services/api";
 import { Guide } from "../../types/guide";
 import { Button, Spinner, Alert } from "flowbite-react";
-import GuideCard from "../../components/GuideCard";
 import GuideModal from "../../components/GuideModal";
+import GuideList from "../../components/GuideList";
 
 export default function DashboardUser() {
   const [purchasedGuides, setPurchasedGuides] = useState<Guide[]>([]);
   const [savedGuides, setSavedGuides] = useState<Guide[]>([]);
-  
+
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
-  
+
   const [selectedGuide, setSelectedGuide] = useState<Guide | null>(null);
   const [isDownloading, setIsDownloading] = useState<string | null>(null);
   const [isPurchasing, setIsPurchasing] = useState<string | null>(null);
-  const [confirmAction, setConfirmAction] = useState<{ type: 'remove' | 'purchase', guideId: string } | null>(null);
+  const [confirmAction, setConfirmAction] = useState<{
+    type: "remove" | "purchase";
+    guideId: string;
+  } | null>(null);
   const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
@@ -24,34 +27,33 @@ export default function DashboardUser() {
 
   const fetchDashboardData = async () => {
     try {
-      
       const [purchasedData, savedData] = await Promise.all([
         libraryService.getPurchased(),
-        libraryService.getMine()
+        libraryService.getMine(),
       ]);
-      
+
       const formattedPurchased: Guide[] = purchasedData.map((item) => ({
-        id: item.guideId, 
-        coachId: "", 
+        id: item.guideId,
+        coachId: "",
         title: item.title,
-        description: "Guide acheté", 
+        description: "Guide acheté",
         category: item.category,
-        isBeginner: true, 
+        isBeginner: true,
         linkUrl: item.linkUrl,
         coverUrl: item.coverUrl,
-        price: item.price
+        price: item.price,
       }));
 
       const formattedSaved: Guide[] = savedData.map((item) => ({
-        id: item.guideId, 
-        coachId: "", 
+        id: item.guideId,
+        coachId: "",
         title: item.title,
-        description: "Sauvegardé dans les favoris", 
+        description: "Sauvegardé dans les favoris",
         category: item.category,
-        isBeginner: true, 
-        linkUrl: "", 
+        isBeginner: true,
+        linkUrl: "",
         coverUrl: item.coverUrl,
-        price: item.price
+        price: item.price,
       }));
 
       setPurchasedGuides(formattedPurchased);
@@ -74,7 +76,7 @@ export default function DashboardUser() {
     }
   };
 
-const executeRemove = async (guideId: string) => {
+  const executeRemove = async (guideId: string) => {
     setConfirmAction(null); // On ferme la confirmation
     try {
       await libraryService.remove(guideId);
@@ -88,24 +90,31 @@ const executeRemove = async (guideId: string) => {
   };
 
   const executePurchase = async (guideId: string) => {
-    setConfirmAction(null); 
+    setConfirmAction(null);
     setIsPurchasing(guideId);
     try {
       await libraryService.purchase(guideId);
-      await fetchDashboardData(); 
+      await fetchDashboardData();
       setSuccessMessage("Achat réussi ! Le guide a été ajouté à vos achats.");
       setError("");
     } catch (err: any) {
-      setError(err.message || "Erreur lors de l'achat. Avez-vous assez de fonds ?");
+      setError(
+        err.message || "Erreur lors de l'achat. Avez-vous assez de fonds ?",
+      );
       setSuccessMessage("");
     } finally {
       setIsPurchasing(null);
     }
   };
 
-  if (isLoading) return <div className="flex h-64 items-center justify-center"><Spinner size="xl" /></div>;
+  if (isLoading)
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Spinner size="xl" />
+      </div>
+    );
 
-return (
+  return (
     <div className="space-y-12">
       {error && (
         <Alert color="failure" className="mb-4" onDismiss={() => setError("")}>
@@ -114,124 +123,131 @@ return (
       )}
 
       {successMessage && (
-        <Alert color="success" className="mb-4" onDismiss={() => setSuccessMessage("")}>
+        <Alert
+          color="success"
+          className="mb-4"
+          onDismiss={() => setSuccessMessage("")}
+        >
           <span className="font-medium">Succès :</span> {successMessage}
         </Alert>
       )}
 
       {/* SECTION 1 : ACHATS */}
       <section>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 border-b pb-2">
+        <h2 className="mb-6 border-b pb-2 text-2xl font-bold text-gray-900 dark:text-white">
           Mes Achats ({purchasedGuides.length})
         </h2>
-        
-        {purchasedGuides.length === 0 ? (
-          <p className="text-gray-500 italic">Vous n'avez pas encore acheté de guide.</p>
-        ) : (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3 lg:grid-cols-4">
-            {purchasedGuides.map((guide) => (
-              <GuideCard
-                key={guide.id}
-                guide={guide}
-                actions={
-                  <div className="flex gap-2 w-full">
-                    <Button
-                      size="xs"
-                      color="purple"
-                      className="w-full"
-                      disabled={isDownloading === guide.id}
-                      onClick={() => handleDownload(guide.id, guide.title)}
-                    >
-                      {isDownloading === guide.id ? <Spinner size="sm" /> : "Lire le PDF"}
-                    </Button>
-                    <Button
-                      size="xs"
-                      color="gray"
-                      className="w-full"
-                      onClick={() => setSelectedGuide(guide)}
-                    >
-                      Détails
-                    </Button>
-                  </div>
-                }
-              />
-            ))}
-          </div>
-        )}
+
+        <GuideList
+          guides={purchasedGuides}
+          emptyMessage="Vous n'avez pas encore acheté de guide."
+          renderActions={(guide) => (
+            <div className="flex w-full gap-2">
+              <Button
+                size="xs"
+                color="purple"
+                className="w-full"
+                disabled={isDownloading === guide.id}
+                onClick={() => handleDownload(guide.id, guide.title)}
+              >
+                {isDownloading === guide.id ? (
+                  <Spinner size="sm" />
+                ) : (
+                  "Lire le PDF"
+                )}
+              </Button>
+              <Button
+                size="xs"
+                color="gray"
+                className="w-full"
+                onClick={() => setSelectedGuide(guide)}
+              >
+                Détails
+              </Button>
+            </div>
+          )}
+        />
       </section>
 
       {/* SECTION 2 : FAVORIS */}
       <section>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 border-b pb-2">
+        <h2 className="mb-6 border-b pb-2 text-2xl font-bold text-gray-900 dark:text-white">
           Mes Favoris ({savedGuides.length})
         </h2>
-        
-        {savedGuides.length === 0 ? (
-          <p className="text-gray-500 italic">Aucun guide dans vos favoris.</p>
-        ) : (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3 lg:grid-cols-4">
-            {savedGuides.map((guide) => (
-              <GuideCard
-                key={guide.id}
-                guide={guide}
-                actions={
-                  confirmAction?.guideId === guide.id ? (
-                    // --- VUE CONFIRMATION (FAVORIS) ---
-                    <div className="flex flex-col gap-2 w-full text-center">
-                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                        {confirmAction.type === 'purchase' ? "Confirmer l'achat ?" : "Retirer des favoris ?"}
-                      </span>
-                      <div className="flex gap-2">
-                        <Button 
-                          size="xs" 
-                          color="purple" 
-                          className="w-full" 
-                          onClick={() => confirmAction.type === 'purchase' ? executePurchase(guide.id) : executeRemove(guide.id)}
-                        >
-                          Oui
-                        </Button>
-                        <Button size="xs" color="gray" className="w-full" onClick={() => setConfirmAction(null)}>
-                          Non
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    // --- VUE NORMALE (FAVORIS) ---
-                    <div className="flex gap-2 w-full">
-                      <Button
-                        size="xs"
-                        color="purple"
-                        className="w-full"
-                        disabled={isPurchasing === guide.id}
-                        onClick={() => setConfirmAction({ type: 'purchase', guideId: guide.id })}
-                      >
-                        {isPurchasing === guide.id ? <Spinner size="sm" /> : "Acheter"}
-                      </Button>
-                      
-                      <Button
-                        size="xs"
-                        color="failure"
-                        className="w-full"
-                        onClick={() => setConfirmAction({ type: 'remove', guideId: guide.id })}
-                      >
-                        Retirer
-                      </Button>
 
-                      <Button
-                        size="xs"
-                        color="gray"
-                        className="w-full"
-                        onClick={() => setSelectedGuide(guide)}
-                      >
-                        Détails
-                      </Button>
-                    </div>
-                  )
-                }
-              />
-            ))}
-          </div>
-        )}
+        <GuideList
+          guides={savedGuides}
+          emptyMessage="Aucun guide dans vos favoris."
+          renderActions={(guide) =>
+            confirmAction?.guideId === guide.id ? (
+              <div className="flex w-full flex-col gap-2 text-center">
+                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  {confirmAction.type === "purchase"
+                    ? "Confirmer l'achat ?"
+                    : "Retirer des favoris ?"}
+                </span>
+                <div className="flex gap-2">
+                  <Button
+                    size="xs"
+                    color="purple"
+                    className="w-full"
+                    onClick={() =>
+                      confirmAction.type === "purchase"
+                        ? executePurchase(guide.id)
+                        : executeRemove(guide.id)
+                    }
+                  >
+                    Oui
+                  </Button>
+                  <Button
+                    size="xs"
+                    color="gray"
+                    className="w-full"
+                    onClick={() => setConfirmAction(null)}
+                  >
+                    Non
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex w-full gap-2">
+                <Button
+                  size="xs"
+                  color="purple"
+                  className="w-full"
+                  disabled={isPurchasing === guide.id}
+                  onClick={() =>
+                    setConfirmAction({ type: "purchase", guideId: guide.id })
+                  }
+                >
+                  {isPurchasing === guide.id ? (
+                    <Spinner size="sm" />
+                  ) : (
+                    "Acheter"
+                  )}
+                </Button>
+                <Button
+                  size="xs"
+                  color="failure"
+                  className="w-full"
+                  onClick={() =>
+                    setConfirmAction({ type: "remove", guideId: guide.id })
+                  }
+                >
+                  Retirer
+                </Button>
+                <Button
+                  size="xs"
+                  color="gray"
+                  className="w-full"
+                  onClick={() => setSelectedGuide(guide)}
+                >
+                  Détails
+                </Button>
+              </div>
+            )
+          }
+        />
       </section>
 
       {/* MODAL PARTAGÉE */}
