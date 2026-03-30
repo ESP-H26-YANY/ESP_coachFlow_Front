@@ -53,7 +53,7 @@ export const userService = {
     }),
 
   topup: (amount: number) => 
-    request<void>("/User/topup", {
+    request<void>("/User/points", {
       method: "POST",
       body: JSON.stringify({ amount }),
     }),
@@ -146,19 +146,17 @@ export const guideService = {
 };
 
 export const libraryService = {
-  // Ajouter un guide à sa bibliothèque
+
   add: (guideId: string) =>
     request<void>(`/Library/${guideId}`, {
       method: "POST",
     }),
 
-  // Récupérer la bibliothèque de l'utilisateur (pour le dashboard)
   getMine: () =>
     request<import("../types/guide").SavedGuide[]>("/Library", {
       method: "GET",
     }),
 
-  // Retirer un guide de sa bibliothèque
   remove: (guideId: string) =>
     request<void>(`/Library/${guideId}`, {
       method: "DELETE",
