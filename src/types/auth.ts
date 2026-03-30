@@ -4,6 +4,7 @@ export interface User {
   name: string;
   email: string;
   role: "coach" | "user"; 
+  wallet?: number;
 }
 
 export interface LoginRequest {

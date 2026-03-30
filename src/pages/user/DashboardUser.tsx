@@ -2,10 +2,13 @@ import { useState, useEffect } from "react";
 import { libraryService, guideService } from "../../services/api";
 import { Guide } from "../../types/guide";
 import { Button, Spinner, Alert } from "flowbite-react";
+import { useAuth } from "../../context/AuthContext";
 import GuideModal from "../../components/GuideModal";
 import GuideList from "../../components/GuideList";
 
 export default function DashboardUser() {
+
+  const { refreshUser } = useAuth();
   const [purchasedGuides, setPurchasedGuides] = useState<Guide[]>([]);
   const [savedGuides, setSavedGuides] = useState<Guide[]>([]);
 
@@ -95,6 +98,7 @@ export default function DashboardUser() {
     try {
       await libraryService.purchase(guideId);
       await fetchDashboardData();
+      await refreshUser();
       setSuccessMessage("Achat réussi ! Le guide a été ajouté à vos achats.");
       setError("");
     } catch (err: any) {

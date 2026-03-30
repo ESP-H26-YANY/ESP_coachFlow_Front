@@ -31,6 +31,11 @@ export default function UserNavbar() {
       </Brand>
 
       <div className="flex md:order-2 gap-2">
+        <div className="hidden md:flex items-center gap-2 mr-2 border-r pr-3 border-gray-300 dark:border-gray-600">
+          <span className="text-sm font-bold text-purple-600 dark:text-purple-400">
+            {user?.wallet !== undefined ? `${user.wallet} $` : "0 $"}
+          </span>
+        </div>
         <span className="hidden md:block self-center mr-2 text-sm font-medium text-gray-700 dark:text-gray-300">
           {user?.name}
         </span>

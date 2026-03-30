@@ -1,19 +1,18 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { User, AuthResponse } from "../types/auth";
-
-// je me suis basé sur ce que j'ai fait la derniere session, et ajuster. 
+import { userService } from "../services/api";
 
 interface AuthContextType {
   user: User | null;
   token: string | null;
   login: (data: AuthResponse) => void;
   logout: () => void;
+  refreshUser: () => Promise<void>; 
   isAuthenticated: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// le children est le composant enfant qui va être enveloppé par le provider, c'est une convention de nommage. ( DE CE QUE J'AI VU DANS LES TUTOS REACT )
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
@@ -33,6 +32,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
   };
 
+  const refreshUser = async () => {
+    if (!token) return;
+    try {
+      const updatedUser = await userService.getMe();
+      setUser(updatedUser);
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour de l'utilisateur", error);
+    }
+  };
+
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (token && storedUser) {
@@ -41,7 +51,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [token]);
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated: !!token }}>
+    <AuthContext.Provider value={{ user, token, login, logout, refreshUser, isAuthenticated: !!token }}>
       {children}
     </AuthContext.Provider>
   );
@@ -49,6 +59,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) throw new Error("");
+  if (!context) throw new Error("AuthCOntext doit être utilisé à l'intérieur d'un AuthProvider");
   return context;
 };
