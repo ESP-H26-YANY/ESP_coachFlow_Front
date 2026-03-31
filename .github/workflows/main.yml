@@ -1,0 +1,45 @@
+name: Deploy Frontend React
+
+on:
+  push:
+    branches:
+      - main  # Remplace par 'master' si c'est le nom de ta branche principale
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Version standard, modifie si besoin
+
+      - name:  Installer les dépendances
+        run: npm ci # 'ci' est plus propre et rapide que 'install' pour les serveurs
+
+      - name:  Compiler le projet (Build)
+        run: npm run build
+
+      - name:  Envoyer les fichiers sur le VPS
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          source: "dist/"
+          target: "/var/www/ESP_coachFlow_Front"
+          overwrite: true
+
+      - name:  Redémarrer PM2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            pm2 restart coachflow-frontend
+            pm2 save
