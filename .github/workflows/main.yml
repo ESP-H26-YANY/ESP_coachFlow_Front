@@ -25,7 +25,7 @@ jobs:
         # C'est ICI que GitHub crée le fichier avant de builder. 
         # Modifie l'URL si ton API a une route spécifique (ex: /api/v1)
         run: |
-          echo "VITE_API_URL=http://185.53.209.197/api" > .env
+          run: echo "VITE_API_URL=${{ secrets.API_URL }}" > .env
 
       - name:  Compiler le projet (Build)
         run: npm run build
