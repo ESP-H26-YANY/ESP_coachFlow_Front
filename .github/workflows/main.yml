@@ -22,10 +22,7 @@ jobs:
         run: npm ci
 
       - name:  Créer le fichier .env de production
-        # C'est ICI que GitHub crée le fichier avant de builder. 
-        # Modifie l'URL si ton API a une route spécifique (ex: /api/v1)
-        run: |
-          run: echo "VITE_API_URL=${{ secrets.API_URL }}" > .env
+        run: echo "VITE_API_URL=${{ secrets.API_URL }}" > .env
 
       - name:  Compiler le projet (Build)
         run: npm run build
