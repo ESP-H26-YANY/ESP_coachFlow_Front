@@ -57,6 +57,11 @@ export const userService = {
       method: "POST",
       body: JSON.stringify({ amount }),
     }),
+      
+  getDashboardStats: () =>
+      request<import("../types/stats").CoachStats>("/User/dashboard-stats", {
+        method: "GET",
+      }),
 };
 
 export const guideService = {

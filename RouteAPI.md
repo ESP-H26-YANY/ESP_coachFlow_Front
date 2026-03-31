@@ -87,3 +87,44 @@
 ### Achats (Avec accès PDF)
 - **Lister :** `GET /api/Library/purchased`
 - **Acheter (via Wallet) :** `POST /api/Library/purchase/{guideId}`
+
+## Statistique ** Coach **
+** Route : User/dashboard-stats **
+
+```json
+{
+  "financials": {
+    "currentWalletBalance": 585,
+    "totalLifetimeEarnings": 185,
+    "revenueLast30Days": 185
+  },
+  "sales": {
+    "totalActiveGuides": 4,
+    "totalGuidesSold": 4,
+    "salesLast30Days": 4,
+    "totalUniqueCustomers": 1
+  },
+  "engagement": {
+    "totalWishlisted": 1,
+    "mostWishlistedGuideId": "a134650d-7433-43db-867f-ba6fb17730aa",
+    "mostWishlistedGuide": "string",
+    "conversionRatePercentage": 400
+  },
+  "topBestSellers": [
+    {
+      "id": "2ac057ac-6d71-4ddf-9e2f-6d30e0295d99",
+      "title": "wdwd",
+      "sales": 1
+    },
+    {
+      "id": "bd793877-932e-4285-9dbb-fede855e6e2a",
+      "title": "testt",
+      "sales": 1
+    },
+    {
+      "id": "097a9e49-636c-4e5f-b277-37bb4e348e85",
+      "title": "string",
+      "sales": 1
+    }
+  ]
+}
