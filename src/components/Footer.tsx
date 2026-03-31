@@ -7,7 +7,7 @@ export default function MyFooter() {
     <Foot container className="mt-auto">
       <div className="w-full text-center">
         <span className="text-sm text-gray-500 sm:text-center dark:text-gray-400 w-full text-center">
-        © 2026 <span className="hover:underline">CoachFlow</span>. Tous droits réservés YANY BOUDEDJA.
+        © 2026 <span className="hover:underline">CoachFlow</span>. Tous droits réservés YANY BOUDEDJA. Version : 2.0
       </span>   
       </div>
     </Foot>
