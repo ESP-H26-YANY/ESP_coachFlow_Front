@@ -52,10 +52,9 @@ export const userService = {
       method: "GET" 
     }),
 
-  topup: (amount: number) => 
-    request<void>("/User/points", {
+  claimReward: () => 
+    request<void>("/User/claim-reward ", {
       method: "POST",
-      body: JSON.stringify({ amount }),
     }),
       
   getDashboardStats: () =>
